@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spanish Learning Game</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:20px; }
+    #game { max-width:600px; margin:auto; background:white; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+    button { padding:10px 15px; margin:5px 0; border:none; border-radius:8px; background:#4CAF50; color:white; cursor:pointer; }
+    button:hover { background:#45a049; }
+    img.question-img { width:120px; display:block; margin:10px 0; }
+  </style>
+</head>
+<body>
+<div id="game">
+  <h2>Spanish Vocabulary Game</h2>
+  <p id="question"></p>
+  <div id="answers"></div>
+  <p id="timer"></p>
+  <p id="score"></p>
+  <button onclick="startGame()">Start Game</button>
+</div>
+
+<script>
+let questions = [
+  { q: "What is 'apple' in Spanish?", img: "images/apple.jpg", answers:["la naranja","la manzana","el queso"], correct:1 },
+  { q: "Which means 'dog'?", img: "images/dog.jpg", answers:["el gato","el perro","el caballo"], correct:1 },
+  { q: "Which means 'cat'?", img: "images/cat.jpg", answers:["el perro","el gato","el ratón"], correct:1 },
+  { q: "Which is 'chair' in Spanish?", img: "images/chair.jpg", answers:["silla","mesa","puerta"], correct:0 },
+  { q: "Fill in: Yo tengo ___ lápiz.", answers:["el","la","los"], correct:0 },
+  { q: "Select the feminine noun:", answers:["libro","mesa","cuaderno","zapato"], correct:1 },
+  { q: "TRUE or FALSE: 'Los libros' means 'the books'.", answers:["True","False"], correct:0 },
+  { q: "Choose correct article: ___ escuela.", answers:["el","la"], correct:1 },
+  { q: "Reorder to form sentence: 'yo / español / estudio'", answers:[], correct:0, reorder:"yo estudio español" },
+  { q: "Which is the correct conjugation of 'hablar' for él/ella?", answers:["hablo","hablas","habla","hablan"], correct:2 }
+];
+
+let current = 0;
+let score = 0;
+let timer = 30;
+let countdown;
+
+function startGame(){
+  score = 0;
+  current = 0;
+  questions = questions.sort(()=>Math.random()-0.5);
+  nextQuestion();
+}
+
+function nextQuestion(){
+  if(current >= questions.length){
+    document.getElementById('question').innerText = "Game Over!";
+    document.getElementById('answers').innerHTML = "";
+    document.getElementById('timer').innerText = "";
+    return;
+  }
+
+  let q = questions[current];
+  let questionHTML = q.q;
+  if(q.img) questionHTML += `<br><img src='${q.img}' class='question-img'>`;
+  document.getElementById('question').innerHTML = questionHTML;
+
+  document.getElementById('answers').innerHTML = "";
+  timer = 30;
+  document.getElementById('timer').innerText = "Time: " + timer;
+  clearInterval(countdown);
+  countdown = setInterval(()=>{
+    timer--;
+    document.getElementById('timer').innerText = "Time: " + timer;
+    if(timer <= 0){
+      clearInterval(countdown);
+      current++;
+      nextQuestion();
+    }
+  },1000);
+
+  if(q.reorder){
+    let btn = document.createElement('button');
+    btn.innerText = "Show Answer";
+    btn.onclick = ()=>{
+      alert(q.reorder);
+      current++;
+      clearInterval(countdown);
+      nextQuestion();
+    };
+    document.getElementById('answers').appendChild(btn);
+  } else {
+    q.answers.forEach((a,i)=>{
+      let btn = document.createElement('button');
+      btn.innerText = a;
+      btn.onclick = ()=>checkAnswer(i);
+      document.getElementById('answers').appendChild(btn);
+    });
+  }
+}
+
+function checkAnswer(i){
+  let q = questions[current];
+  let multiplier = timer / 10;
+  if(i === q.correct){ score += Math.round(10 * multiplier); }
+  document.getElementById('score').innerText = "Score: " + score;
+  current++;
+  clearInterval(countdown);
+  nextQuestion();
+}
+</script>
+</body>
+</html>
